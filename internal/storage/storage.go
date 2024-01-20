@@ -6,10 +6,10 @@ import (
 	"github.com/Rizabekus/effective-mobile-rest-api/internal/models"
 )
 
-type PersonStorage struct {
-	Storage models.PersonStorage
+type Storage struct {
+	PersonStorage models.PersonStorage
 }
 
-func StorageInstance(db *sql.DB) *PersonStorage {
-	return &PersonStorage{Storage: CreatePersonStorage(db)}
+func StorageInstance(db *sql.DB) *Storage {
+	return &Storage{PersonStorage: CreatePersonStorage(db)}
 }

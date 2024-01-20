@@ -9,8 +9,8 @@ type Services struct {
 	PersonService models.PersonService
 }
 
-func ServiceInstance(storage *storage.PersonStorage) *Services {
+func ServiceInstance(storage *storage.Storage) *Services {
 	return &Services{
-		PersonService: CreatePersonService(storage),
+		PersonService: CreatePersonService(storage.PersonStorage),
 	}
 }

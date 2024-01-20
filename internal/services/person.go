@@ -9,3 +9,7 @@ type PersonService struct {
 func CreatePersonService(storage models.PersonStorage) *PersonService {
 	return &PersonService{storage: storage}
 }
+
+func (PersonService *PersonService) GetPeople() ([]models.Person, error) {
+	return PersonService.storage.GetPeople()
+}
