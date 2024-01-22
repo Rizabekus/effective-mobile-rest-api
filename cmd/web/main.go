@@ -1,8 +1,11 @@
 package main
 
-import "github.com/Rizabekus/effective-mobile-rest-api/internal/app"
+import (
+	"github.com/Rizabekus/effective-mobile-rest-api/internal/app"
+)
 
 func main() {
+
 	app.Run()
 }
 
