@@ -4,14 +4,17 @@
 
 This service processes API requests for personal information, enriches the response with probable age, gender, and nationality using external APIs, and stores the data in a PostgreSQL database. It exposes various RESTful methods for managing people records.
 
+## Project Summary
+
+The People Service API is designed to provide a seamless interface for handling personal information. It utilizes external APIs to enhance the data with details such as age, gender, and nationality. The enriched data is stored in a PostgreSQL database, and the service offers RESTful methods for CRUD operations on people records. The project emphasizes clean code, efficient filtering, and pagination, along with comprehensive logging for monitoring and debugging.
+
 ## REST Methods
 
 1. **Get People**
    - Endpoint: `/people`
    - Method: `GET`
    - Retrieves data with filters and pagination.
-   - For filtering use: name, surname, gender, minAge, maxAge, nationality.
-   - For pagination use: page, pageSize
+
 2. **Get Person by ID**
    - Endpoint: `/people/{id}`
    - Method: `GET`
@@ -47,5 +50,3 @@ The code is extensively covered with debug and info logs to facilitate troublesh
 ## Configuration
 
 Sensitive configuration data is stored in a `.env` file.
-
-
