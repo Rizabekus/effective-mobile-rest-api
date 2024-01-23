@@ -1,6 +1,9 @@
 package models
 
-import "net/url"
+import (
+	"net/http"
+	"net/url"
+)
 
 type PersonService interface {
 	GetPeople() ([]Person, error)
@@ -12,6 +15,7 @@ type PersonService interface {
 	UpdatePerson(UpdatedPerson, string) error
 	FilteredSearch(queries url.Values) ([]Person, error)
 	Pagination(int, int, []Person) []Person
+	SendResponse(ResponseStructure, http.ResponseWriter, int)
 }
 type PersonStorage interface {
 	GetPeople() ([]Person, error)
@@ -35,11 +39,11 @@ type UpdatedPerson struct {
 	Name        string `json:"name" validate:"omitempty,min=1,max=50,alpha"`
 	Surname     string `json:"surname" validate:"omitempty,min=1,max=50,alpha"`
 	Patronymic  string `json:"patronymic" validate:"omitempty,min=1,max=50,alpha"`
-	Gender      string `json:"gender" validate:"omitempty,eq=Male|eq=Female|eq=male|eq=female"`
+	Gender      string `json:"gender" validate:"omitempty,eq=Male|eq=Female"`
 	Nationality string `json:"nationality" validate:"omitempty,alpha,len=2"`
 	Age         int    `json:"age" validate:"omitempty,min=0,max=150"`
 }
-type ErrorResponse struct {
+type ResponseStructure struct {
 	Field string `json:"field"`
 	Error string `json:"error"`
 }

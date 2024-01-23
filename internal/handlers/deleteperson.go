@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/Rizabekus/effective-mobile-rest-api/internal/models"
 	"github.com/gorilla/mux"
 )
 
@@ -12,19 +13,35 @@ func (handler *Handlers) DeletePerson(w http.ResponseWriter, r *http.Request) {
 
 	exist, err := handler.Service.PersonService.DoesExistByID(personID)
 	if err != nil {
-		http.Error(w, "Failed to get information", http.StatusInternalServerError)
+		response := models.ResponseStructure{
+			Field: "Failed to get information",
+			Error: err.Error(),
+		}
+		handler.Service.PersonService.SendResponse(response, w, http.StatusInternalServerError)
 		return
 	}
+
+	var response models.ResponseStructure
 	if exist {
 		err = handler.Service.PersonService.DeleteByID(personID)
 		if err != nil {
-			http.Error(w, "Failed to get information", http.StatusInternalServerError)
+			response = models.ResponseStructure{
+				Field: "Failed to get information",
+				Error: err.Error(),
+			}
+			handler.Service.PersonService.SendResponse(response, w, http.StatusInternalServerError)
 			return
 		}
-		w.WriteHeader(http.StatusCreated)
-		w.Write([]byte("Person deleted successfully"))
+		response = models.ResponseStructure{
+			Field: "Person deleted successfully",
+			Error: "",
+		}
+		handler.Service.PersonService.SendResponse(response, w, http.StatusCreated)
 	} else {
-		w.WriteHeader(http.StatusNoContent)
-		w.Write([]byte("Person doesn't exist"))
+		response = models.ResponseStructure{
+			Field: "Person doesn't exist",
+			Error: "",
+		}
+		handler.Service.PersonService.SendResponse(response, w, http.StatusNoContent)
 	}
 }

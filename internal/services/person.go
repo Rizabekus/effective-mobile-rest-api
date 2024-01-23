@@ -1,6 +1,8 @@
 package services
 
 import (
+	"encoding/json"
+	"net/http"
 	"net/url"
 
 	"github.com/Rizabekus/effective-mobile-rest-api/internal/models"
@@ -57,4 +59,24 @@ func (PersonService *PersonService) Pagination(page, pageSize int, people []mode
 	}
 
 	return people[startIdx:endIdx]
+}
+
+func (PersonService *PersonService) SendResponse(response models.ResponseStructure, w http.ResponseWriter, statusCode int) {
+	responseJSON, err := json.Marshal(response)
+	if err != nil {
+
+		internalError := models.ResponseStructure{
+			Field: "Internal Server Error",
+			Error: "Failed to marshal JSON response",
+		}
+		internalErrorJSON, _ := json.Marshal(internalError)
+
+		w.Header().Set("Content-Type", "application/json")
+		http.Error(w, string(internalErrorJSON), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	w.Write(responseJSON)
 }

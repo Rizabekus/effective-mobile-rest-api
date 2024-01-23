@@ -16,50 +16,65 @@ func (handler *Handlers) UpdatePerson(w http.ResponseWriter, r *http.Request) {
 	personID := vars["id"]
 	exist, err := handler.Service.PersonService.DoesExistByID(personID)
 	if err != nil {
-		http.Error(w, "Doesn't exist", http.StatusNoContent)
+		response := models.ResponseStructure{
+			Field: "Doesn't exist",
+			Error: err.Error(),
+		}
+		handler.Service.PersonService.SendResponse(response, w, http.StatusNoContent)
 		return
 	}
+
 	if exist {
 		var updatedValues models.UpdatedPerson
 		err := json.NewDecoder(r.Body).Decode(&updatedValues)
 		if err != nil {
-			http.Error(w, "Failed to decode JSON", http.StatusBadRequest)
+			response := models.ResponseStructure{
+				Field: "Failed to decode JSON",
+				Error: err.Error(),
+			}
+			handler.Service.PersonService.SendResponse(response, w, http.StatusBadRequest)
 			return
 		}
+
 		validate := validator.New()
 		err = validate.Struct(updatedValues)
-
 		if err != nil {
 			validationErrors, ok := err.(validator.ValidationErrors)
 			if !ok {
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				response := models.ResponseStructure{
+					Field: "Internal Server Error",
+					Error: err.Error(),
+				}
+				handler.Service.PersonService.SendResponse(response, w, http.StatusInternalServerError)
 				return
 			}
 
 			for _, ve := range validationErrors {
-				response := models.ErrorResponse{
+				response := models.ResponseStructure{
 					Field: fmt.Sprintf("Field: %s, Tag: %s\n", ve.Field(), ve.Tag()),
 					Error: err.Error(),
 				}
 
-				responseJSON, _ := json.Marshal(response)
-
-				w.Header().Set("Content-Type", "application/json")
-				http.Error(w, string(responseJSON), http.StatusBadRequest)
+				handler.Service.PersonService.SendResponse(response, w, http.StatusBadRequest)
 				return
-
 			}
-
 		}
 
 		err = handler.Service.PersonService.UpdatePerson(updatedValues, personID)
 		if err != nil {
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			response := models.ResponseStructure{
+				Field: "Internal Server Error",
+				Error: err.Error(),
+			}
+			handler.Service.PersonService.SendResponse(response, w, http.StatusInternalServerError)
 			fmt.Println(err)
 			return
 		}
-		w.WriteHeader(http.StatusNoContent)
-		w.Write([]byte("Person updated successfully"))
 
+		response := models.ResponseStructure{
+			Field: "Person updated successfully",
+			Error: "",
+		}
+		handler.Service.PersonService.SendResponse(response, w, http.StatusNoContent)
 	}
 }

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+
+	"github.com/Rizabekus/effective-mobile-rest-api/internal/models"
 )
 
 func (handler *Handlers) GetPeople(w http.ResponseWriter, r *http.Request) {
@@ -13,10 +15,15 @@ func (handler *Handlers) GetPeople(w http.ResponseWriter, r *http.Request) {
 	people, err := handler.Service.PersonService.FilteredSearch(queryParams)
 	fmt.Println(people)
 	if err != nil {
-		http.Error(w, "Failed to get people", http.StatusInternalServerError)
-		fmt.Println(err)
+		response := models.ResponseStructure{
+			Field: "Failed to get people",
+			Error: err.Error(),
+		}
+		handler.Service.PersonService.SendResponse(response, w, http.StatusInternalServerError)
+
 		return
 	}
+
 	pageQuery := r.URL.Query().Get("page")
 	var page int
 	if pageQuery == "" {
@@ -24,7 +31,11 @@ func (handler *Handlers) GetPeople(w http.ResponseWriter, r *http.Request) {
 	} else {
 		page, err = strconv.Atoi(pageQuery)
 		if err != nil {
-			http.Error(w, "Invalid 'page' parameter", http.StatusBadRequest)
+			response := models.ResponseStructure{
+				Field: "Invalid 'page' parameter",
+				Error: err.Error(),
+			}
+			handler.Service.PersonService.SendResponse(response, w, http.StatusBadRequest)
 			return
 		}
 	}
@@ -36,7 +47,11 @@ func (handler *Handlers) GetPeople(w http.ResponseWriter, r *http.Request) {
 	} else {
 		pageSize, err = strconv.Atoi(pageSizeQuery)
 		if err != nil {
-			http.Error(w, "Invalid 'pageSzie' parameter", http.StatusBadRequest)
+			response := models.ResponseStructure{
+				Field: "Invalid 'pageSize' parameter",
+				Error: err.Error(),
+			}
+			handler.Service.PersonService.SendResponse(response, w, http.StatusBadRequest)
 			return
 		}
 	}
@@ -47,11 +62,14 @@ func (handler *Handlers) GetPeople(w http.ResponseWriter, r *http.Request) {
 
 	jsonData, err := json.Marshal(people)
 	if err != nil {
-		http.Error(w, "Failed to encode JSON", http.StatusInternalServerError)
+		response := models.ResponseStructure{
+			Field: "Failed to encode JSON",
+			Error: err.Error(),
+		}
+		handler.Service.PersonService.SendResponse(response, w, http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-
 	w.Write(jsonData)
 }
