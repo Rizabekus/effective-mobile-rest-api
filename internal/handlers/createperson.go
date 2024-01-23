@@ -7,10 +7,12 @@ import (
 	"net/http"
 
 	"github.com/Rizabekus/effective-mobile-rest-api/internal/models"
+	"github.com/Rizabekus/effective-mobile-rest-api/pkg/loggers.go"
 	"gopkg.in/go-playground/validator.v9"
 )
 
 func (handler *Handlers) CreatePerson(w http.ResponseWriter, r *http.Request) {
+	loggers.DebugLog.Println("Received a request to CreatePerson")
 
 	var newPerson models.Person
 	err := json.NewDecoder(r.Body).Decode(&newPerson)
@@ -20,8 +22,12 @@ func (handler *Handlers) CreatePerson(w http.ResponseWriter, r *http.Request) {
 			Error: err.Error(),
 		}
 		handler.Service.PersonService.SendResponse(response, w, http.StatusBadRequest)
+
+		loggers.InfoLog.Println("Failed to decode JSON")
 		return
 	}
+
+	loggers.DebugLog.Println("Decoded JSON")
 
 	validate := validator.New()
 	err = validate.StructPartial(newPerson, "Name", "Surname", "Patronymic")
@@ -33,6 +39,8 @@ func (handler *Handlers) CreatePerson(w http.ResponseWriter, r *http.Request) {
 				Error: err.Error(),
 			}
 			handler.Service.PersonService.SendResponse(response, w, http.StatusInternalServerError)
+
+			loggers.InfoLog.Println("Internal Server Error")
 			return
 		}
 
@@ -46,11 +54,15 @@ func (handler *Handlers) CreatePerson(w http.ResponseWriter, r *http.Request) {
 		}
 
 		handler.Service.PersonService.SendResponse(errors[0], w, http.StatusBadRequest)
+
+		loggers.InfoLog.Println("Validation Error")
 		return
 	}
 
 	exist, err := handler.Service.PersonService.DoesExist(newPerson)
 	if exist {
+		loggers.DebugLog.Println("Person already exists")
+
 		response := models.ResponseStructure{
 			Field: "Person already exists",
 			Error: "",
@@ -64,6 +76,8 @@ func (handler *Handlers) CreatePerson(w http.ResponseWriter, r *http.Request) {
 			Error: err.Error(),
 		}
 		handler.Service.PersonService.SendResponse(response, w, http.StatusInternalServerError)
+
+		loggers.InfoLog.Println("Failed to get information")
 		return
 	}
 
@@ -74,8 +88,12 @@ func (handler *Handlers) CreatePerson(w http.ResponseWriter, r *http.Request) {
 			Error: err.Error(),
 		}
 		handler.Service.PersonService.SendResponse(response, w, http.StatusInternalServerError)
+
+		loggers.InfoLog.Println("Failed to add person")
 		return
 	}
+
+	loggers.DebugLog.Println("Person created successfully")
 
 	response := models.ResponseStructure{
 		Field: "Person created successfully",

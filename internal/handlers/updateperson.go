@@ -6,14 +6,17 @@ import (
 	"net/http"
 
 	"github.com/Rizabekus/effective-mobile-rest-api/internal/models"
+	"github.com/Rizabekus/effective-mobile-rest-api/pkg/loggers.go"
 	"github.com/gorilla/mux"
 	"gopkg.in/go-playground/validator.v9"
 )
 
 func (handler *Handlers) UpdatePerson(w http.ResponseWriter, r *http.Request) {
-
+	loggers.DebugLog.Print("Received a request to UpdatePerson")
 	vars := mux.Vars(r)
 	personID := vars["id"]
+	loggers.DebugLog.Print("Received an ID")
+
 	exist, err := handler.Service.PersonService.DoesExistByID(personID)
 	if err != nil {
 		response := models.ResponseStructure{
@@ -25,6 +28,8 @@ func (handler *Handlers) UpdatePerson(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if exist {
+		loggers.DebugLog.Print("Checked ID for existence")
+
 		var updatedValues models.UpdatedPerson
 		err := json.NewDecoder(r.Body).Decode(&updatedValues)
 		if err != nil {
@@ -35,6 +40,8 @@ func (handler *Handlers) UpdatePerson(w http.ResponseWriter, r *http.Request) {
 			handler.Service.PersonService.SendResponse(response, w, http.StatusBadRequest)
 			return
 		}
+
+		loggers.DebugLog.Print("Decoded JSON")
 
 		validate := validator.New()
 		err = validate.Struct(updatedValues)
@@ -67,14 +74,17 @@ func (handler *Handlers) UpdatePerson(w http.ResponseWriter, r *http.Request) {
 				Error: err.Error(),
 			}
 			handler.Service.PersonService.SendResponse(response, w, http.StatusInternalServerError)
-			fmt.Println(err)
+
+			loggers.InfoLog.Print("Failed to update person")
 			return
 		}
+
+		loggers.DebugLog.Print("Person updated successfully")
 
 		response := models.ResponseStructure{
 			Field: "Person updated successfully",
 			Error: "",
 		}
-		handler.Service.PersonService.SendResponse(response, w, http.StatusNoContent)
+		handler.Service.PersonService.SendResponse(response, w, http.StatusAccepted)
 	}
 }

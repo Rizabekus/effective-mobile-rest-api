@@ -7,20 +7,26 @@ import (
 	"strconv"
 
 	"github.com/Rizabekus/effective-mobile-rest-api/internal/models"
+	"github.com/Rizabekus/effective-mobile-rest-api/pkg/loggers.go"
 )
 
 func (handler *Handlers) GetPeople(w http.ResponseWriter, r *http.Request) {
-
+	loggers.DebugLog.Println("Received a request to GetPeople")
 	queryParams := r.URL.Query()
+	loggers.DebugLog.Println("Received query parameters")
 	people, err := handler.Service.PersonService.FilteredSearch(queryParams)
-	fmt.Println(people)
+
+	loggers.DebugLog.Println("Filtered search results")
+
 	if err != nil {
+		errorMsg := fmt.Sprintf("Failed to get people: %s", err.Error())
 		response := models.ResponseStructure{
 			Field: "Failed to get people",
-			Error: err.Error(),
+			Error: errorMsg,
 		}
 		handler.Service.PersonService.SendResponse(response, w, http.StatusInternalServerError)
 
+		loggers.InfoLog.Println(errorMsg)
 		return
 	}
 
@@ -31,11 +37,14 @@ func (handler *Handlers) GetPeople(w http.ResponseWriter, r *http.Request) {
 	} else {
 		page, err = strconv.Atoi(pageQuery)
 		if err != nil {
+			errorMsg := fmt.Sprintf("Invalid 'page' parameter: %s", err.Error())
 			response := models.ResponseStructure{
 				Field: "Invalid 'page' parameter",
-				Error: err.Error(),
+				Error: errorMsg,
 			}
 			handler.Service.PersonService.SendResponse(response, w, http.StatusBadRequest)
+
+			loggers.InfoLog.Println(errorMsg)
 			return
 		}
 	}
@@ -47,11 +56,14 @@ func (handler *Handlers) GetPeople(w http.ResponseWriter, r *http.Request) {
 	} else {
 		pageSize, err = strconv.Atoi(pageSizeQuery)
 		if err != nil {
+			errorMsg := fmt.Sprintf("Invalid 'pageSize' parameter: %s", err.Error())
 			response := models.ResponseStructure{
 				Field: "Invalid 'pageSize' parameter",
-				Error: err.Error(),
+				Error: errorMsg,
 			}
 			handler.Service.PersonService.SendResponse(response, w, http.StatusBadRequest)
+
+			loggers.InfoLog.Println(errorMsg)
 			return
 		}
 	}
@@ -59,17 +71,21 @@ func (handler *Handlers) GetPeople(w http.ResponseWriter, r *http.Request) {
 	if page >= 1 && pageSize >= 1 {
 		people = handler.Service.PersonService.Pagination(page, pageSize, people)
 	}
-
+	loggers.DebugLog.Println("Successfully made pagination")
 	jsonData, err := json.Marshal(people)
 	if err != nil {
+		errorMsg := fmt.Sprintf("Failed to encode JSON: %s", err.Error())
 		response := models.ResponseStructure{
 			Field: "Failed to encode JSON",
-			Error: err.Error(),
+			Error: errorMsg,
 		}
 		handler.Service.PersonService.SendResponse(response, w, http.StatusInternalServerError)
+
+		loggers.InfoLog.Println(errorMsg)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonData)
+	loggers.DebugLog.Println("GetPeople completed successfully")
 }

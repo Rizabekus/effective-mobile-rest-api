@@ -39,7 +39,7 @@ type UpdatedPerson struct {
 	Name        string `json:"name" validate:"omitempty,min=1,max=50,alpha"`
 	Surname     string `json:"surname" validate:"omitempty,min=1,max=50,alpha"`
 	Patronymic  string `json:"patronymic" validate:"omitempty,min=1,max=50,alpha"`
-	Gender      string `json:"gender" validate:"omitempty,eq=Male|eq=Female"`
+	Gender      string `json:"gender" validate:"omitempty,eq=Male|eq=Female|eq=male|eq=female"`
 	Nationality string `json:"nationality" validate:"omitempty,alpha,len=2"`
 	Age         int    `json:"age" validate:"omitempty,min=0,max=150"`
 }

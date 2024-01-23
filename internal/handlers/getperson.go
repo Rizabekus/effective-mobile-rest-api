@@ -5,12 +5,15 @@ import (
 	"net/http"
 
 	"github.com/Rizabekus/effective-mobile-rest-api/internal/models"
+	"github.com/Rizabekus/effective-mobile-rest-api/pkg/loggers.go"
 	"github.com/gorilla/mux"
 )
 
 func (handler *Handlers) GetPerson(w http.ResponseWriter, r *http.Request) {
+	loggers.DebugLog.Println("Received a request to GetPerson")
 	vars := mux.Vars(r)
 	personID := vars["id"]
+	loggers.DebugLog.Println("Received an ID")
 	exist, err := handler.Service.PersonService.DoesExistByID(personID)
 	if err != nil {
 		response := models.ResponseStructure{
@@ -22,6 +25,7 @@ func (handler *Handlers) GetPerson(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if exist {
+		loggers.DebugLog.Println("Checked ID for existence")
 		person, err := handler.Service.PersonService.GetPersonByID(personID)
 		if err != nil {
 			response := models.ResponseStructure{
@@ -45,6 +49,7 @@ func (handler *Handlers) GetPerson(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write(personJSON)
+		loggers.DebugLog.Println("GetPerson completed successfully")
 	} else {
 		response := models.ResponseStructure{
 			Field: "Person doesn't exist",
